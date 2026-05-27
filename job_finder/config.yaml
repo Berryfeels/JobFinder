@@ -1,0 +1,74 @@
+database:
+  url: "sqlite:///jobfinder.db"
+
+auth:
+  secret_key: "dev-secret-key"
+  cookie_expiry_days: 7
+  credentials:
+    usernames:
+      admin:
+        email: "admin@example.com"
+        name: "Admin"
+        password: "$2b$12$WybiFjuMaVe5EbPlGUc7CepPCVo3C6vibMKrPRLALFsQTZgUUxS4m"
+        profile_type: "tech"
+
+profiles:
+  tech:
+    name: "Software Engineer"
+    keywords_default:
+      - "software engineer"
+      - "backend developer"
+      - "python developer"
+    location_default: "Berlin, Germany"
+    remote: true
+    sources_default:
+      - linkedin
+      - indeed
+      - glassdoor
+      - greenhouse
+      - lever
+      - remotive
+      - arbeitnow
+  geopolitics:
+    name: "Geopolitica / Relazioni Internazionali"
+    keywords_default:
+      - "policy analyst"
+      - "international relations"
+      - "foreign affairs"
+    location_default: ""
+    remote: true
+    sources_default:
+      - reliefweb
+      - idealist
+      - eurobrussels
+      - un_careers
+      - linkedin
+      - indeed
+
+slug_companies:
+  - spotify
+  - stripe
+  - zalando
+  - adobe
+  - n26
+  - delivery-hero
+  - soundcloud
+  - sumup
+  - gorillas
+
+api_keys:
+  adzuna_app_id: ""
+  adzuna_app_key: ""
+
+jobspy:
+  results_wanted: 50
+  hours_old: 72
+  country_indeed: "Germany"
+
+scheduler:
+  default_time: "08:00"
+  timezone: "Europe/Berlin"
+
+logging:
+  level: "INFO"
+  file: "jobfinder.log"

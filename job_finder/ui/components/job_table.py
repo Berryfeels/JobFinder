@@ -1,0 +1,2 @@
+# Job table component placeholder.
+
