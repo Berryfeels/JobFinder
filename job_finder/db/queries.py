@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from sqlalchemy.orm import Session
 
 from job_finder.db.models import Job, User
@@ -47,10 +49,13 @@ def update_job_status(session: Session, job_id: str, status: str, notes: str = "
     return job
 
 
-def mark_application_sent(session: Session, job_id: str, date: str) -> Job | None:
+def mark_application_sent(session: Session, job_id: str, date: str | datetime) -> Job | None:
     job = session.query(Job).filter(Job.id == job_id).first()
     if job:
         job.application_sent = True
+        # Convert string to datetime if needed
+        if isinstance(date, str):
+            date = datetime.fromisoformat(date.replace('Z', '+00:00'))
         job.application_date = date
         job.status = "applied"
         session.commit()

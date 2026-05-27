@@ -66,14 +66,7 @@ def test_update_job_status_unknown_id_returns_none(db_session):
 
 @pytest.mark.integration
 def test_mark_application_sent(db_session, user_id):
-    """
-    BUG DOCUMENTATO: mark_application_sent riceve `date` come stringa,
-    ma Job.application_date è mappato come DateTime in SQLAlchemy.
-    Passare una stringa causa StatementError su SQLite (e probabilmente
-    anche su PostgreSQL).  Il fix corretto è convertire la stringa in
-    datetime prima dell'assegnazione, oppure cambiare il tipo della
-    colonna a String.  Fino ad allora il test usa un datetime object.
-    """
+    """mark_application_sent now accepts both str and datetime objects."""
     job = Job(
         user_id=user_id, source="greenhouse", source_id="app-1",
         company="Y", title="SRE", status="new",
@@ -81,10 +74,28 @@ def test_mark_application_sent(db_session, user_id):
     db_session.add(job)
     db_session.commit()
 
-    app_date = datetime(2024, 5, 1)
-    result = mark_application_sent(db_session, job.id, app_date)
+    # Test with string (ISO format)
+    result = mark_application_sent(db_session, job.id, "2024-05-01T10:30:00Z")
     assert result.application_sent is True
     assert result.status == "applied"
+    assert isinstance(result.application_date, datetime)
+    assert result.application_date.year == 2024
+    assert result.application_date.month == 5
+
+
+@pytest.mark.integration
+def test_mark_application_sent_with_datetime_object(db_session, user_id):
+    """mark_application_sent also accepts datetime objects."""
+    job = Job(
+        user_id=user_id, source="lever", source_id="app-2",
+        company="Z", title="DevOps", status="new",
+    )
+    db_session.add(job)
+    db_session.commit()
+
+    app_date = datetime(2024, 6, 15, 14, 30)
+    result = mark_application_sent(db_session, job.id, app_date)
+    assert result.application_sent is True
     assert result.application_date == app_date
 
 
