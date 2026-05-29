@@ -17,7 +17,7 @@ class BaseFetcher(ABC):
         return {
             "source": self.source_name,
             "source_id": raw_job.get("source_id", ""),
-            "raw_data": raw_job,
+            "raw_data": raw_job.get("raw_data", raw_job),
             "title": raw_job.get("title"),
             "company": raw_job.get("company"),
             "location": raw_job.get("location"),
@@ -31,6 +31,6 @@ class BaseFetcher(ABC):
             "phone": raw_job.get("phone"),
             "description": raw_job.get("description"),
             "industry": raw_job.get("industry"),
-            "tags": raw_job.get("tags", []),
+            "tags": raw_job.get("tags") or [],
             "posted_at": raw_job.get("posted_at"),
         }

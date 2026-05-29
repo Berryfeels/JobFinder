@@ -57,8 +57,21 @@ slug_companies:
   - gorillas
 
 api_keys:
-  adzuna_app_id: ""
-  adzuna_app_key: ""
+  adzuna_app_id: "cd8c104f"
+  adzuna_app_key: "ed02642f610d17c9733aaefa541d4047"
+
+adzuna:
+  country: "de"
+  results_per_page: 50
+
+reliefweb:
+  limit: 50
+
+remotive:
+  limit: 50
+
+arbeitnow:
+  limit: 50
 
 jobspy:
   results_wanted: 50

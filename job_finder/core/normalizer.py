@@ -40,11 +40,13 @@ class Normalizer:
     def _parse_datetime(dt_str: str | None) -> datetime | None:
         if not dt_str:
             return None
-        try:
-            if isinstance(dt_str, str):
-                if "T" in dt_str:
-                    return datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
-                return datetime.strptime(dt_str[:10], "%Y-%m-%d")
+        if isinstance(dt_str, datetime):
             return dt_str
+        if not isinstance(dt_str, str):
+            return None
+        try:
+            if "T" in dt_str:
+                return datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
+            return datetime.strptime(dt_str[:10], "%Y-%m-%d")
         except Exception:
             return None

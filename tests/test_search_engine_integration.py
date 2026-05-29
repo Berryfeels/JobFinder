@@ -5,6 +5,10 @@ import pytest
 import job_finder.core.search_engine as search_engine
 from job_finder.core.search_engine import SearchEngine
 from job_finder.db.models import Job, Search
+from job_finder.fetchers.adzuna import AdzunaFetcher
+from job_finder.fetchers.arbeitnow import ArbeitnowFetcher
+from job_finder.fetchers.reliefweb import ReliefWebFetcher
+from job_finder.fetchers.remotive import RemotiveFetcher
 from job_finder.fetchers.slug_fetcher import GreenhouseFetcher, LeverFetcher
 
 
@@ -153,3 +157,57 @@ def test_search_engine_jobspy_source(monkeypatch, db_session, user_id):
     assert result["new_jobs"] == 1
     assert result["total_found"] == 1
 
+
+@pytest.mark.integration
+def test_search_engine_keyword_api_sources(monkeypatch, db_session, user_id):
+    config = {
+        "profiles": {"tech": {"sources_default": ["adzuna", "reliefweb", "remotive", "arbeitnow"]}},
+        "api_keys": {"adzuna_app_id": "id", "adzuna_app_key": "key"},
+        "adzuna": {"country": "de"},
+    }
+    monkeypatch.setattr(search_engine, "load_config", lambda: config)
+    monkeypatch.setattr(search_engine, "get_slug_companies", lambda _: [])
+
+    monkeypatch.setattr(
+        AdzunaFetcher,
+        "fetch",
+        lambda self, **_kwargs: [{"source": "adzuna", "source_id": "a1", "company": "adz", "title": "A"}],
+    )
+    monkeypatch.setattr(
+        ReliefWebFetcher,
+        "fetch",
+        lambda self, **_kwargs: [{"source": "reliefweb", "source_id": "r1", "company": "relief", "title": "B"}],
+    )
+    monkeypatch.setattr(
+        RemotiveFetcher,
+        "fetch",
+        lambda self, **_kwargs: [{"source": "remotive", "source_id": "m1", "company": "rem", "title": "C"}],
+    )
+    monkeypatch.setattr(
+        ArbeitnowFetcher,
+        "fetch",
+        lambda self, **_kwargs: [{"source": "arbeitnow", "source_id": "w1", "company": "arb", "title": "D"}],
+    )
+
+    engine = SearchEngine(db_session, user_id)
+    result = engine.search("python")
+
+    assert result["total_found"] == 4
+    assert result["new_jobs"] == 4
+
+
+@pytest.mark.integration
+def test_search_engine_adzuna_missing_keys(monkeypatch, db_session, user_id):
+    config = {
+        "profiles": {"tech": {"sources_default": ["adzuna"]}},
+        "api_keys": {"adzuna_app_id": "", "adzuna_app_key": ""},
+    }
+    monkeypatch.setattr(search_engine, "load_config", lambda: config)
+    monkeypatch.setattr(search_engine, "get_slug_companies", lambda _: [])
+
+    engine = SearchEngine(db_session, user_id)
+    result = engine.search("python")
+
+    assert result["total_found"] == 0
+    assert len(result["errors"]) == 1
+    assert result["errors"][0]["source"] == "adzuna"

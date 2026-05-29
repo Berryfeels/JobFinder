@@ -14,6 +14,24 @@ def render_search(user_id: str):
     config = load_config()
     session = get_session()
 
+    supported_sources = [
+        "linkedin",
+        "indeed",
+        "glassdoor",
+        "google",
+        "greenhouse",
+        "lever",
+        "adzuna",
+        "reliefweb",
+        "remotive",
+        "arbeitnow",
+    ]
+    default_sources = [
+        source
+        for source in config.get("profiles", {}).get("tech", {}).get("sources_default", [])
+        if source in supported_sources
+    ] or ["linkedin", "indeed", "glassdoor"]
+
     with st.form("search_form"):
         keywords = st.text_area("Keywords (comma-separated)", value="software engineer, python, backend")
         location = st.text_input("Location", value="Berlin, Germany")
@@ -21,8 +39,8 @@ def render_search(user_id: str):
 
         sources = st.multiselect(
             "Sources",
-            options=["linkedin", "indeed", "glassdoor", "greenhouse"],
-            default=["linkedin", "indeed", "glassdoor"],
+            options=supported_sources,
+            default=default_sources,
         )
 
         if st.form_submit_button("🔍 Search Now"):

@@ -8,8 +8,12 @@ from job_finder.config import get_slug_companies, load_config
 from job_finder.core.deduplicator import Deduplicator
 from job_finder.core.normalizer import Normalizer
 from job_finder.db.models import Job, Search
-from job_finder.fetchers.slug_fetcher import GreenhouseFetcher, LeverFetcher
+from job_finder.fetchers.adzuna import AdzunaFetcher
+from job_finder.fetchers.arbeitnow import ArbeitnowFetcher
 from job_finder.fetchers.jobspy_adapter import JobSpyAdapter
+from job_finder.fetchers.reliefweb import ReliefWebFetcher
+from job_finder.fetchers.remotive import RemotiveFetcher
+from job_finder.fetchers.slug_fetcher import GreenhouseFetcher, LeverFetcher
 
 
 class SearchEngine:
@@ -37,6 +41,14 @@ class SearchEngine:
                     jobs_found.extend(self._search_greenhouse())
                 elif source == "lever":
                     jobs_found.extend(self._search_lever())
+                elif source == "adzuna":
+                    jobs_found.extend(self._search_adzuna(keywords, location))
+                elif source == "reliefweb":
+                    jobs_found.extend(self._search_reliefweb(keywords))
+                elif source == "remotive":
+                    jobs_found.extend(self._search_remotive(keywords))
+                elif source == "arbeitnow":
+                    jobs_found.extend(self._search_arbeitnow(keywords, location))
                 elif source in ["linkedin", "indeed", "glassdoor", "google"]:
                     jobs_found.extend(self._search_jobspy([source], keywords, location))
             except Exception as e:
@@ -108,3 +120,31 @@ class SearchEngine:
             hours_old=self.config.get("jobspy", {}).get("hours_old", 72),
         )
 
+    def _search_adzuna(self, keywords: str, location: str) -> list[dict[str, Any]]:
+        api_keys = self.config.get("api_keys", {})
+        app_id = api_keys.get("adzuna_app_id")
+        app_key = api_keys.get("adzuna_app_key")
+        country = self.config.get("adzuna", {}).get("country", "de")
+        results_per_page = self.config.get("adzuna", {}).get("results_per_page", 50)
+        fetcher = AdzunaFetcher(
+            app_id=app_id,
+            app_key=app_key,
+            country=country,
+            results_per_page=results_per_page,
+        )
+        return fetcher.fetch(keywords=keywords, location=location)
+
+    def _search_reliefweb(self, keywords: str) -> list[dict[str, Any]]:
+        limit = self.config.get("reliefweb", {}).get("limit", 50)
+        fetcher = ReliefWebFetcher(limit=limit)
+        return fetcher.fetch(keywords=keywords)
+
+    def _search_remotive(self, keywords: str) -> list[dict[str, Any]]:
+        limit = self.config.get("remotive", {}).get("limit", 50)
+        fetcher = RemotiveFetcher(limit=limit)
+        return fetcher.fetch(keywords=keywords)
+
+    def _search_arbeitnow(self, keywords: str, location: str) -> list[dict[str, Any]]:
+        limit = self.config.get("arbeitnow", {}).get("limit")
+        fetcher = ArbeitnowFetcher(limit=limit)
+        return fetcher.fetch(keywords=keywords, location=location)
