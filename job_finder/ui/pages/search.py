@@ -22,8 +22,6 @@ def render_search(user_id: str):
         "greenhouse",
         "lever",
         "adzuna",
-        "reliefweb",
-        "remotive",
         "arbeitnow",
     ]
     default_sources = [
@@ -32,9 +30,13 @@ def render_search(user_id: str):
         if source in supported_sources
     ] or ["linkedin", "indeed", "glassdoor"]
 
+    tech_profile = config.get("profiles", {}).get("tech", {})
+    default_keywords = ", ".join(tech_profile.get("keywords_default", []))
+    default_location = tech_profile.get("location_default", "Berlin, Germany")
+
     with st.form("search_form"):
-        keywords = st.text_area("Keywords (comma-separated)", value="software engineer, python, backend")
-        location = st.text_input("Location", value="Berlin, Germany")
+        keywords = st.text_area("Keywords (comma-separated)", value=default_keywords)
+        location = st.text_input("Location", value=default_location)
         remote_only = st.checkbox("Remote only", value=True)
 
         sources = st.multiselect(

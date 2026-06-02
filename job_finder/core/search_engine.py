@@ -11,7 +11,6 @@ from job_finder.db.models import Job, Search
 from job_finder.fetchers.adzuna import AdzunaFetcher
 from job_finder.fetchers.arbeitnow import ArbeitnowFetcher
 from job_finder.fetchers.jobspy_adapter import JobSpyAdapter
-from job_finder.fetchers.reliefweb import ReliefWebFetcher
 from job_finder.fetchers.remotive import RemotiveFetcher
 from job_finder.fetchers.slug_fetcher import GreenhouseFetcher, LeverFetcher
 
@@ -43,8 +42,6 @@ class SearchEngine:
                     jobs_found.extend(self._search_lever())
                 elif source == "adzuna":
                     jobs_found.extend(self._search_adzuna(keywords, location))
-                elif source == "reliefweb":
-                    jobs_found.extend(self._search_reliefweb(keywords))
                 elif source == "remotive":
                     jobs_found.extend(self._search_remotive(keywords))
                 elif source == "arbeitnow":
@@ -133,11 +130,6 @@ class SearchEngine:
             results_per_page=results_per_page,
         )
         return fetcher.fetch(keywords=keywords, location=location)
-
-    def _search_reliefweb(self, keywords: str) -> list[dict[str, Any]]:
-        limit = self.config.get("reliefweb", {}).get("limit", 50)
-        fetcher = ReliefWebFetcher(limit=limit)
-        return fetcher.fetch(keywords=keywords)
 
     def _search_remotive(self, keywords: str) -> list[dict[str, Any]]:
         limit = self.config.get("remotive", {}).get("limit", 50)

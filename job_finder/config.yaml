@@ -16,9 +16,11 @@ profiles:
   tech:
     name: "Software Engineer"
     keywords_default:
+      - "Junior"
       - "software engineer"
-      - "backend developer"
-      - "python developer"
+      - "C"
+      - "C++"
+      - "Python"
     location_default: "Berlin, Germany"
     remote: true
     sources_default:
@@ -27,8 +29,10 @@ profiles:
       - glassdoor
       - greenhouse
       - lever
-      - remotive
       - arbeitnow
+      - google
+      - adzuna
+      - reliefweb
   geopolitics:
     name: "Geopolitica / Relazioni Internazionali"
     keywords_default:
@@ -63,12 +67,6 @@ api_keys:
 adzuna:
   country: "de"
   results_per_page: 50
-
-reliefweb:
-  limit: 50
-
-remotive:
-  limit: 50
 
 arbeitnow:
   limit: 50

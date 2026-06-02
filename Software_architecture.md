@@ -826,6 +826,14 @@ playwright
 Comandi
 Start Streamlit + program: python3 -m streamlit run job_finder/app.py
 Test Suite (local): PYTHONPATH=. pytest
+
+flush command (flushes search result and search results+search history)
+all users:
+JOBFINDER_ENV=dev python3 -m job_finder.dev_tools flush-search-results --yes
+only one user:
+JOBFINDER_ENV=dev python3 -m job_finder.dev_tools flush-search-results --user admin --yes
+delete search history:
+JOBFINDER_ENV=dev python3 -m job_finder.dev_tools flush-search-results --include-searches --yes
 ```
 
 *Documento di riferimento — aggiornare prima di ogni sessione di sviluppo.*

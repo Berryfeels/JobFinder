@@ -5,7 +5,7 @@ from typing import Any
 import httpx
 
 from job_finder.fetchers.base import BaseFetcher
-from job_finder.fetchers.keyword_fetcher import normalize_keywords
+from job_finder.fetchers.keyword_fetcher import keyword_tokens, matches_keywords, normalize_keywords
 
 
 class RemotiveFetcher(BaseFetcher):
@@ -18,15 +18,23 @@ class RemotiveFetcher(BaseFetcher):
     def fetch(self, keywords: str, **_kwargs) -> list[dict[str, Any]]:
         query = normalize_keywords(keywords)
         params: dict[str, Any] = {"limit": self.limit}
-        if query:
-            params["search"] = query
 
         response = httpx.get(self.BASE_URL, params=params, timeout=10)
         response.raise_for_status()
         payload = response.json()
 
+        tokens = keyword_tokens(keywords)
         jobs = []
         for job in payload.get("jobs", []):
+            # Client-side keyword filtering (Remotive API search param doesn't work)
+            if tokens:
+                title = job.get("title") or ""
+                description = job.get("description") or ""
+                tags = " ".join(job.get("tags") or [])
+                searchable_text = f"{title} {description} {tags}"
+                if not matches_keywords(searchable_text, tokens):
+                    continue
+
             job_data = {
                 "source_id": str(job.get("id") or job.get("url") or ""),
                 "title": job.get("title"),
