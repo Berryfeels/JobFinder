@@ -40,12 +40,29 @@ def _scrollable_block(anchor_id: str, height_px: int) -> None:
     )
 
 
+def _get_cached_jobs(session, user_id: str):
+    cache_key = f"dashboard_jobs_{user_id}"
+    if cache_key not in st.session_state:
+        st.session_state[cache_key] = get_jobs_for_user(session, user_id)
+    return st.session_state[cache_key]
+
+
+def _update_cached_job(user_id: str, job_id: str, **updates) -> None:
+    cache_key = f"dashboard_jobs_{user_id}"
+    jobs = st.session_state.get(cache_key, [])
+    for job in jobs:
+        if job.id == job_id:
+            for field, value in updates.items():
+                setattr(job, field, value)
+            break
+
+
 def render_dashboard(user_id: str):
     """Render results dashboard."""
     st.header("📋 Results")
 
     session = get_session()
-    jobs = get_jobs_for_user(session, user_id)
+    jobs = _get_cached_jobs(session, user_id)
 
     if not jobs:
         st.info("No jobs found yet. Run a search from the Search tab.")
@@ -81,9 +98,11 @@ def render_dashboard(user_id: str):
                     col1, col2 = st.columns(2)
                     if col1.button("🟢 Interesting", key=f"int_{job.id}"):
                         update_job_status(session, job.id, "saved")
+                        _update_cached_job(user_id, job.id, status="saved")
                         st.rerun()
                     if col2.button("🔴 Not Interesting", key=f"not_{job.id}"):
                         update_job_status(session, job.id, "rejected")
+                        _update_cached_job(user_id, job.id, status="rejected")
                         st.rerun()
 
     st.divider()
@@ -99,7 +118,9 @@ def render_dashboard(user_id: str):
                     col1, col2 = st.columns(2)
                     if not job.application_sent and col1.button("✅ Mark Applied", key=f"app_{job.id}"):
                         mark_application_sent(session, job.id, str(st.date_input("Date applied", key=f"date_{job.id}")))
+                        _update_cached_job(user_id, job.id, application_sent=True, status="applied")
                         st.rerun()
                     if col2.button("🔴 Not Interesting", key=f"ni_{job.id}"):
                         update_job_status(session, job.id, "rejected")
+                        _update_cached_job(user_id, job.id, status="rejected")
                         st.rerun()
