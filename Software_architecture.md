@@ -824,7 +824,9 @@ playwright
 ## 18. Utilizzo in development
 ```
 Comandi
-Start Streamlit + program: python3 -m streamlit run job_finder/app.py
+Start Streamlit + program: 
+python3 -m streamlit run job_finder/app.py
+
 Test Suite (local): PYTHONPATH=. pytest
 
 flush command (flushes search result and search results+search history)

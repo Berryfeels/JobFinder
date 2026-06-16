@@ -16,13 +16,8 @@ profiles:
   tech:
     name: "Software Engineer"
     keywords_default:
-      - "Junior"
       - "software engineer"
-      - "C"
-      - "C++"
-      - "Python"
     location_default: "Berlin, Germany"
-    remote: true
     sources_default:
       - linkedin
       - indeed
@@ -40,7 +35,6 @@ profiles:
       - "international relations"
       - "foreign affairs"
     location_default: ""
-    remote: true
     sources_default:
       - reliefweb
       - idealist

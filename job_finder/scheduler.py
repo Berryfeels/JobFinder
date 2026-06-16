@@ -25,18 +25,18 @@ def run_search_for_user(username: str):
         return
 
     profile = get_profile_defaults(config, user.profile_type or "tech")
-    keywords = ", ".join(profile.get("keywords", []))
 
     logger.info(f"Starting search for user {username}")
 
-    search_engine = SearchEngine(session, user.id)
+    search_engine = SearchEngine(session, user.id, profile_type=user.profile_type or "tech")
     result = search_engine.search(
-        keywords=keywords,
-        location=profile.get("location", ""),
+        filter_keywords="",
         sources=profile.get("sources", []),
     )
 
-    logger.info(f"Search complete: {result['total_found']} found, {result['new_jobs']} new")
+    logger.info(
+        f"Search complete: scraped {result['total_scraped']} jobs, kept {result['total_found']} matching jobs, {result['new_jobs']} new"
+    )
 
 
 def start_scheduler():

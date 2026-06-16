@@ -5,6 +5,7 @@ import streamlit as st
 from job_finder.config import load_config
 from job_finder.core.search_engine import SearchEngine
 from job_finder.db.database import get_session
+from job_finder.ui.components.job_table import clear_cached_jobs
 
 
 def render_search(user_id: str):
@@ -31,13 +32,16 @@ def render_search(user_id: str):
     ] or ["linkedin", "indeed", "glassdoor"]
 
     tech_profile = config.get("profiles", {}).get("tech", {})
-    default_keywords = ", ".join(tech_profile.get("keywords_default", []))
-    default_location = tech_profile.get("location_default", "Berlin, Germany")
+    scrape_keywords = ", ".join(tech_profile.get("keywords_default", []))
+
+    st.caption(f"Scraping keywords from profile: {scrape_keywords or 'none'}")
 
     with st.form("search_form"):
-        keywords = st.text_area("Keywords (comma-separated)", value=default_keywords)
-        location = st.text_input("Location", value=default_location)
-        remote_only = st.checkbox("Remote only", value=True)
+        filter_keywords = st.text_area(
+            "Filter keywords (comma-separated)",
+            value="",
+            help="Only jobs matching all entered keywords are kept and saved.",
+        )
 
         sources = st.multiselect(
             "Sources",
@@ -47,10 +51,13 @@ def render_search(user_id: str):
 
         if st.form_submit_button("🔍 Search Now"):
             with st.spinner("Searching..."):
-                search_engine = SearchEngine(session, user_id)
-                result = search_engine.search(keywords, location, sources)
+                search_engine = SearchEngine(session, user_id, profile_type="tech")
+                result = search_engine.search(filter_keywords=filter_keywords, sources=sources)
+                clear_cached_jobs(user_id)
 
-                st.success(f"✅ Found {result['total_found']} jobs, {result['new_jobs']} new")
+                st.success(
+                    f"✅ Scraped {result['total_scraped']} jobs, kept {result['total_found']} matching jobs, {result['new_jobs']} new"
+                )
 
                 if result["errors"]:
                     st.warning(f"⚠️ {len(result['errors'])} sources had errors")

@@ -68,7 +68,6 @@ def get_profile_defaults(config: dict[str, Any], profile_type: str) -> dict[str,
     return {
         "keywords": profile.get("keywords_default", []),
         "location": profile.get("location_default", ""),
-        "remote": bool(profile.get("remote", False)),
         "sources": profile.get("sources_default", []),
     }
 
